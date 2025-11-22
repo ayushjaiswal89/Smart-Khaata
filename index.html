@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Smart Khaata — Home, Rent & Farm Manager</title>
+
+  <!-- PWA meta -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0f1221">
+
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f1221">
+
+<!-- iPhone support -->
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+<!-- Service Worker Register -->
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("service-worker.js")
+      .then(() => console.log("SW Registered"));
+  }
+</script>
+
+</head>
+<body>
+  <!-- HEADER -->
+  <header class="main-header">
+    <div class="header-left">
+      <div class="logo">
+        <div class="logo-badge" aria-hidden="true"></div>
+        <div>
+          <h1>Smart Khaata</h1>
+          <span class="muted">Home • Rent • Farm</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- controls -->
+    <div class="header-right">
+      <nav class="tabs desktop-tabs" aria-label="Main tabs">
+        <button class="tab-btn active" data-tab="home">🏠 Home</button>
+        <button class="tab-btn" data-tab="rent">🏢 Rent</button>
+        <button class="tab-btn" data-tab="farm">🌾 Farm</button>
+        <button class="tab-btn" data-tab="reports">📊 Reports</button>
+        <button class="tab-btn" data-tab="backup">🗄️ Backup</button>
+        <button class="tab-btn" data-tab="settings">⚙️ Settings</button>
+      </nav>
+
+      <button id="menu-toggle" class="menu-btn" aria-label="Open menu">☰</button>
+    </div>
+  </header>
+
+  <!-- MOBILE SLIDE MENU -->
+  <aside id="mobile-menu" class="slide-menu" aria-hidden="true">
+    <button data-tab="home">🏠 Home</button>
+    <button data-tab="rent">🏢 Rent</button>
+    <button data-tab="farm">🌾 Farm</button>
+    <button data-tab="reports">📊 Reports</button>
+    <button data-tab="backup">🗄️ Backup</button>
+    <button data-tab="settings">⚙️ Settings</button>
+  </aside>
+
+  <!-- BOTTOM NAV (mobile) -->
+  <nav class="bottom-nav" aria-hidden="true">
+    <button data-tab="home">🏠</button>
+    <button data-tab="rent">🏢</button>
+    <button data-tab="farm">🌾</button>
+    <button data-tab="reports">📊</button>
+    <button id="fab-export" title="Export">⬇️</button>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="container">
+    <!-- HOME -->
+    <section class="tab card" id="tab-home" role="region">
+      <h2>🏠 Home Expenses</h2>
+      <p class="muted">घर के खर्च जोड़ें, कैटेगरी के हिसाब से ट्रैक करें।</p>
+
+      <div class="grid">
+        <div class="card">
+          <form id="form-home">
+            <div class="row">
+              <div class="col-4">
+                <label>तारीख</label>
+                <input type="date" name="date" required />
+              </div>
+              <div class="col-4">
+                <label>कैटेगरी</label>
+                <select name="category" required>
+                  <option>किराना</option><option>यूटिलिटी</option><option>दवा</option>
+                  <option>परिवहन</option><option>शिक्षा</option><option>अन्य</option>
+                </select>
+              </div>
+              <div class="col-4">
+                <label>राशि (₹)</label>
+                <input type="number" name="amount" step="0.01" min="0" required />
+              </div>
+              <div class="col-12">
+                <label>विवरण</label>
+                <input type="text" name="note" placeholder="उदा. दूध, सब्ज़ी, बिजली बिल..." />
+              </div>
+            </div>
+
+            <div class="toolbar">
+              <button class="btn" type="submit">➕ खर्च जोड़ें</button>
+              <button class="btn secondary" type="button" id="home-clear">सूची साफ़ करें</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="kpi">
+            <div class="box">
+              <div class="small muted">इस माह कुल खर्च</div>
+              <div class="val" id="home-month-total">₹0</div>
+              <div class="bar"><div class="fill" id="home-month-bar" style="width:0%"></div></div>
+            </div>
+            <div class="box">
+              <div class="small muted">दैनिक औसत</div>
+              <div class="val" id="home-daily-avg">₹0</div>
+            </div>
+            <div class="box">
+              <div class="small muted">सबसे बड़ी कैटेगरी</div>
+              <div class="val" id="home-top-cat">—</div>
+            </div>
+          </div>
+
+          <div class="toolbar">
+            <input id="home-search" placeholder="खोजें (कैटेगरी/विवरण)" />
+            <select id="home-month-filter"><option value="">सभी महीने</option></select>
+            <button class="btn secondary small" id="home-export">CSV एक्सपोर्ट</button>
+          </div>
+
+          <div class="table-wrap">
+            <table id="home-table">
+              <thead><tr><th>तारीख</th><th>कैटेगरी</th><th>विवरण</th><th>राशि</th><th></th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RENT -->
+    <section class="tab card hidden" id="tab-rent">
+      <h2>🏢 Rent Income</h2>
+      <p class="muted">किराये की इनकम, देय/प्राप्ति और टेनेंट ट्रैक करें।</p>
+
+      <div class="grid">
+        <div class="card">
+          <form id="form-rent">
+            <div class="row">
+              <div class="col-3"><label>तारीख</label><input type="date" name="date" required /></div>
+              <div class="col-3"><label>टेनेंट</label><input type="text" name="tenant" required /></div>
+              <div class="col-3"><label>महीना</label>
+                <select name="month" required>
+                  <option>Jan</option><option>Feb</option><option>Mar</option><option>Apr</option>
+                  <option>May</option><option>Jun</option><option>Jul</option><option>Aug</option>
+                  <option>Sep</option><option>Oct</option><option>Nov</option><option>Dec</option>
+                </select>
+              </div>
+              <div class="col-3"><label>राशि (₹)</label><input type="number" name="amount" min="0" required /></div>
+              <div class="col-6"><label>स्टेटस</label>
+                <select name="status"><option>Received</option><option>Pending</option><option>Partial</option></select>
+              </div>
+              <div class="col-6"><label>नोट</label><input type="text" name="note" /></div>
+            </div>
+            <div class="toolbar">
+              <button class="btn" type="submit">➕ इनकम जोड़ें</button>
+              <button class="btn secondary" id="rent-clear">सूची साफ़ करें</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="kpi">
+            <div class="box"><div class="small muted">माह की कुल वसूली</div><div class="val" id="rent-month-total">₹0</div></div>
+            <div class="box"><div class="small muted">पेंडिंग</div><div class="val" id="rent-pending">₹0</div></div>
+            <div class="box"><div class="small muted">टेनेंट्स</div><div class="val" id="rent-tenants">0</div></div>
+          </div>
+
+          <div class="toolbar">
+            <input id="rent-search" placeholder="टेनेंट/नोट खोजें" />
+            <select id="rent-month-filter"><option value="">सभी महीने</option></select>
+            <button class="btn secondary small" id="rent-export">CSV एक्सपोर्ट</button>
+          </div>
+
+          <div class="table-wrap">
+            <table id="rent-table">
+              <thead><tr><th>तारीख</th><th>टेनेंट</th><th>महीना</th><th>राशि</th><th>स्टेटस</th><th></th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FARM -->
+    <section class="tab card hidden" id="tab-farm">
+      <h2>🌾 Farm Management</h2>
+      <p class="muted">खर्च/उत्पादन/बिक्री—एक ही जगह।</p>
+
+      <div class="grid">
+        <div class="card">
+          <form id="form-farm">
+            <div class="row">
+              <div class="col-3"><label>तारीख</label><input type="date" name="date" required /></div>
+              <div class="col-3"><label>टाइप</label>
+                <select name="type"><option>Expense</option><option>Yield</option><option>Sale</option></select></div>
+              <div class="col-3"><label>फ़सल</label><input type="text" name="crop" required /></div>
+              <div class="col-3"><label>राशि/मात्रा</label><input type="number" name="value" required /></div>
+              <div class="col-12"><label>नोट</label><input type="text" name="note" /></div>
+            </div>
+            <div class="toolbar">
+              <button class="btn">➕ रिकॉर्ड जोड़ें</button>
+              <button class="btn secondary" id="farm-clear">सूची साफ़ करें</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="kpi">
+            <div class="box"><div class="small muted">कुल फ़ार्म खर्च</div><div class="val" id="farm-expense">₹0</div><div class="bar"><div class="fill" id="farm-expense-bar"></div></div></div>
+            <div class="box"><div class="small muted">कुल बिक्री</div><div class="val" id="farm-sales">₹0</div><div class="bar"><div class="fill" id="farm-sales-bar"></div></div></div>
+            <div class="box"><div class="small muted">अनुमानित लाभ</div><div class="val" id="farm-profit">₹0</div></div>
+          </div>
+
+          <div class="toolbar">
+            <input id="farm-search" placeholder="फ़सल/नोट खोजें" />
+            <select id="farm-type-filter"><option value="">सभी</option><option>Expense</option><option>Yield</option><option>Sale</option></select>
+            <button class="btn secondary small" id="farm-export">CSV एक्सपोर्ट</button>
+          </div>
+
+          <div class="table-wrap">
+            <table id="farm-table">
+              <thead><tr><th>तारीख</th><th>टाइप</th><th>फ़सल</th><th>मात्रा</th><th>नोट</th><th></th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- REPORTS -->
+    <section class="tab card hidden" id="tab-reports">
+      <h2>📊 Reports & Insights</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>समरी</h3>
+          <div class="kpi">
+            <div class="box"><div class="small muted">Home खर्च</div><div class="val" id="r-home">₹0</div></div>
+            <div class="box"><div class="small muted">Rent प्राप्ति</div><div class="val" id="r-rent">₹0</div></div>
+            <div class="box"><div class="small muted">Farm प्रॉफिट</div><div class="val" id="r-farm">₹0</div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>मासिक ट्रेंड</h3>
+          <div class="bar" style="height:16px;margin:10px 0"><div class="fill" id="r-ratio" style="width:50%"></div></div>
+          <div class="muted small">नीला = Rent, हरा = Home तुलना</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BACKUP -->
+    <section class="tab card hidden" id="tab-backup">
+      <h2>🗄️ Backup / Restore</h2>
+      <div class="toolbar">
+        <button class="btn" id="backup-export">JSON Export</button>
+        <label for="backup-import" class="btn secondary">JSON Import</label>
+        <input type="file" id="backup-import" class="hidden" accept="application/json" />
+      </div>
+      <textarea id="backup-text" rows="8" placeholder="यहाँ JSON दिखेगा…"></textarea>
+    </section>
+
+    <!-- SETTINGS -->
+    <section class="tab card hidden" id="tab-settings">
+      <h2>⚙️ Settings</h2>
+      <div class="row">
+        <div class="col-6"><label>महीने का खर्च लक्ष्य</label><input id="goal-expense" type="number" min="0" /></div>
+        <div class="col-6"><label>किराया लक्ष्य</label><input id="goal-rent" type="number" min="0" /></div>
+      </div>
+      <button class="btn" id="save-settings">सेव</button>
+      <span class="muted" id="save-msg"></span>
+    </section>
+  </main>
+
+  <footer>Smart Khaata • खर्च, किराया, खेती — सब एक जगह</footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

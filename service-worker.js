@@ -3,14 +3,14 @@ self.addEventListener("install", e => {
   e.waitUntil(
     caches.open("smart-khaata-v1").then(cache => {
       return cache.addAll([
-        "/",
-        "/index.html",
-        "/style.css",
-        "/script.js",
-        "/icon-192.png",
-        "/icon-512.png",
+       "/",
+"/index.html",
+"/style.css",
+"/script.js",
+"/icon-192.png",
+"/icon-512.png",
+"/manifest.json"
 
-        "/manifest.json"
       ]);
     })
   );
@@ -23,3 +23,4 @@ self.addEventListener("fetch", e => {
     })
   );
 });
+

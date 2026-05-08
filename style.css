@@ -128,6 +128,7 @@ input:focus,select:focus,textarea:focus{
   gap:10px;
   margin-bottom:10px;
 }
+.col-2{grid-column:span 2}
 .col-3{grid-column:span 3}
 .col-4{grid-column:span 4}
 .col-6{grid-column:span 6}
@@ -202,11 +203,20 @@ tr:hover td{background:#121733}
   border:1px solid #1f295d;
   border-radius:12px;
   padding:12px;
+  overflow:hidden;
+  min-height:80px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
 }
 .kpi .val{
-  font-size:22px;
   font-weight:900;
   margin-top:6px;
+  word-break:break-word;
+  overflow-wrap:break-word;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  max-width:100%;
 }
 
 /* ---------- PROGRESS BAR ---------- */
@@ -299,6 +309,10 @@ tr:hover td{background:#121733}
   .logo h1{font-size:18px}
   .grid{display:block}
   .card{padding:12px}
+  .kpi{grid-template-columns:1fr}
+  .kpi .val{font-size:20px}
+  .row{gap:8px}
+  .col-2,.col-3,.col-4{grid-column:span 6}
 
   /* MOBILE TABLE */
   table,thead,tbody,th,td,tr{display:block;width:100%}

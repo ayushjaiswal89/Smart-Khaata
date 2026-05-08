@@ -1,7 +1,7 @@
 {
   "name": "Smart Khaata",
   "short_name": "Khaata",
-  "start_url": "/index.html",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#0f1221",
   "theme_color": "#6dd3fb",

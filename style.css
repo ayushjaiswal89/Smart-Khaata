@@ -210,6 +210,7 @@ tr:hover td{background:#121733}
   justify-content:space-between;
 }
 .kpi .val{
+  font-size:22px;
   font-weight:900;
   margin-top:6px;
   word-break:break-word;

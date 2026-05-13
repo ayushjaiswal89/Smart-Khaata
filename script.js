@@ -12,7 +12,7 @@ const store = {
 };
 
 // ---------- State ----------
-const state = store.get("smart-khaata", {
+const state = store.get("smart-khaata1", {
   home: [], rent: [], farm: [], settings: {goalExpense:0, goalRent:0}
 });
 
@@ -131,7 +131,7 @@ $("#form-home").addEventListener("submit", e=>{
     note: f.note.value.trim()
   });
 
-  store.set("smart-khaata", state);
+  store.set("smart-khaata1", state);
 
   f.reset(); 
   f.date.value = todayStr();
@@ -145,7 +145,7 @@ function setupEventListeners() {
   if(homeClr) homeClr.onclick = ()=>{
     if(confirm("सभी Home रिकॉर्ड हटाएँ?")){
       state.home = [];
-      store.set("smart-khaata", state);
+      store.set("smart-khaata1", state);
       renderHome();
     }
   };
@@ -160,8 +160,8 @@ function setupEventListeners() {
   if(homeExp) homeExp.onclick = ()=>{
     const rows = filteredHome();
     const csv = 
-      "date,category,note,amount\n" + 
-      rows.map(r => `${r.date},${r.category},"${r.note}",${r.amount}`).join("\n");
+      "Date,Category,Note,Amount\n" + 
+      rows.map(r => `"${r.date}","${r.category}","${r.note}",${r.amount}`).join("\n");
 
     download(`home-${todayStr()}.csv`, csv);
   };
@@ -170,7 +170,7 @@ function setupEventListeners() {
   if(rentClr) rentClr.onclick = ()=>{
     if(confirm("सभी Rent इनकम हटाएँ?")){
       state.rent = [];
-      store.set("smart-khaata", state);
+      store.set("smart-khaata1", state);
       renderRent();
     }
   };
@@ -185,7 +185,7 @@ function setupEventListeners() {
   if(rentExp) rentExp.onclick = ()=>{
     const rows = filteredRent();
     const csv =
-      "date,tenant,month,amount,prevReading,currentReading,ratePerUnit,units,lightBill,totalAmount,status,note\n" +
+      "Date,Tenant,Month,Amount,PrevReading,CurrentReading,RatePerUnit,Units,LightBill,TotalAmount,Status,Note\n" +
       rows.map(r => {
         const prev = r.prevReading ?? "";
         const curr = r.currentReading ?? "";
@@ -193,7 +193,7 @@ function setupEventListeners() {
         const units = r.units ?? "";
         const bill = r.lightBill ?? 0;
         const total = r.totalAmount ?? r.amount ?? 0;
-        return `${r.date},"${r.tenant}",${r.month},${r.amount},${prev},${curr},${rate},${units},${bill},${total},${r.status},"${r.note}"`;
+        return `"${r.date}","${r.tenant}","${r.month}",${r.amount},"${prev}","${curr}","${rate}","${units}",${bill},${total},"${r.status}","${r.note}"`;
       }).join("\n");
 
     download(`rent-${todayStr()}.csv`, csv);
@@ -247,7 +247,7 @@ function renderHome(){
   tbody.querySelectorAll("[data-del]").forEach(btn=>{
     btn.onclick = ()=>{
       state.home = state.home.filter(x=>x.id !== btn.dataset.del);
-      store.set("smart-khaata", state);
+      store.set("smart-khaata1", state);
       renderHome();
     };
   });
@@ -419,7 +419,7 @@ $("#form-rent").addEventListener("submit", e=>{
     totalAmount: Number(f.amount.value||0) + bill
   });
 
-  store.set("smart-khaata", state);
+  store.set("smart-khaata1", state);
 
   f.reset();
   f.date.value = todayStr();
@@ -462,7 +462,7 @@ function renderRent(){
   tbody.querySelectorAll("[data-del]").forEach(btn=>{
     btn.onclick = ()=>{
       state.rent = state.rent.filter(x=>x.id !== btn.dataset.del);
-      store.set("smart-khaata", state);
+      store.set("smart-khaata1", state);
       renderRent();
     };
   });
@@ -566,7 +566,7 @@ $("#form-farm").addEventListener("submit", e=>{
     state.farm.unshift(farmData);
   }
 
-  store.set("smart-khaata", state);
+  store.set("smart-khaata1", state);
   f.reset();
   f.date.value = todayStr();
   renderFarm();
@@ -578,17 +578,19 @@ const farmExportBtn = $("#farm-export");
 if(farmExportBtn) {
   farmExportBtn.onclick = ()=>{
     const rows = filteredFarm();
-    const csv = rows.map(r=>{
-      if(r.type==="Expense") {
-        return `${r.date},${r.type},"${r.crop}","${fmt(r.amount)}","${r.note}"`;
-      } else if(r.type==="Yield") {
-        return `${r.date},${r.type},"${r.crop}","${r.quantity} ${r.unit}","${r.note}"`;
-      } else {
-        return `${r.date},${r.type},"${r.crop}","${r.quantity} ${r.unit} × ${fmt(r.price)}","${r.note}"`;
-      }
-    }).join("\n");
+    const csv = "Date,Type,Crop,Quantity,Unit,Price,Amount,Note\n" +
+      rows.map(r=>{
+        if(r.type==="Expense") {
+          return `"${r.date}","${r.type}","${r.crop}","","","","${r.amount}","${r.note}"`;
+        } else if(r.type==="Yield") {
+          return `"${r.date}","${r.type}","${r.crop}","${r.quantity}","${r.unit}","","","${r.note}"`;
+        } else if(r.type==="Sale") {
+          const amount = r.quantity * r.price;
+          return `"${r.date}","${r.type}","${r.crop}","${r.quantity}","${r.unit}","${r.price}","${amount}","${r.note}"`;
+        }
+      }).filter(Boolean).join("\n");
 
-    download(`farm-${todayStr()}.csv`, "Date,Type,Crop,Value,Note\n"+csv);
+    download(`farm-${todayStr()}.csv`, csv);
   };
 }
 
@@ -666,7 +668,7 @@ function renderFarm(){
   tbody.querySelectorAll("[data-del]").forEach(btn=>{
     btn.onclick = ()=>{
       state.farm = state.farm.filter(x=>x.id !== btn.dataset.del);
-      store.set("smart-khaata", state);
+      store.set("smart-khaata1", state);
       renderFarm();
     };
   });
@@ -689,13 +691,17 @@ function renderFarm(){
   profitEl.style.color = profit >= 0 ? "#7ef29a" : "#ff9b9b";
 
   const goal = Math.max(1, expense + sales);
-  $("#farm-expense-bar").style.width = (expense/goal*100)+"%";
-  $("#farm-sales-bar").style.width   = (sales/goal*100)+"%";
+  const farmExpenseBar = $("#farm-expense-bar");
+  const farmSalesBar = $("#farm-sales-bar");
+  if (farmExpenseBar) farmExpenseBar.style.width = (expense/goal*100)+"%";
+  if (farmSalesBar) farmSalesBar.style.width   = (sales/goal*100)+"%";
   
   // Update chart
   const maxVal = Math.max(expense, sales, 1);
-  $("#exp-bar").style.height = (expense/maxVal*100)+"%";
-  $("#sale-bar").style.height = (sales/maxVal*100)+"%";
+  const expBar = $("#exp-bar");
+  const saleBar = $("#sale-bar");
+  if (expBar) expBar.style.height = (expense/maxVal*100)+"%";
+  if (saleBar) saleBar.style.height = (sales/maxVal*100)+"%";
   renderReports();
 }
 
@@ -761,7 +767,7 @@ $("#backup-import").onchange = async e=>{
     const d = JSON.parse(await file.text());
     ["home","rent","farm","settings"].forEach(k=> state[k] = d[k] ?? state[k]);
 
-    store.set("smart-khaata", state);
+    store.set("smart-khaata1", state);
     renderAll();
     alert("इम्पोर्ट सफल!");
   }catch(e){
@@ -781,7 +787,7 @@ function loadSettings(){
 $("#save-settings").onclick = ()=>{
   state.settings.goalExpense = Number($("#goal-expense").value||0);
   state.settings.goalRent    = Number($("#goal-rent").value||0);
-  store.set("smart-khaata", state);
+  store.set("smart-khaata1", state);
 
   $("#save-msg").textContent = "सेव हुआ!";
   setTimeout(()=> $("#save-msg").textContent="",1500);
